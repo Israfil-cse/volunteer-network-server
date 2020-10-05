@@ -18,7 +18,7 @@ app.use(cors());
 const port = 4000
 
 app.get('/', (req, res) =>{
-  res.send('HI, I am Israfil and this is my voluinteer server')
+  res.send('HI, I am Israfil and this is my voluinteer server API')
 })
 
 const client = new MongoClient(uri, { useNewUrlParser: true,useUnifiedTopology: true });
