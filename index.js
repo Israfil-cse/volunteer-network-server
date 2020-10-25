@@ -25,6 +25,7 @@ const client = new MongoClient(uri, { useNewUrlParser: true,useUnifiedTopology: 
 client.connect(err => {
   const collection = client.db("volunteer").collection("Items");
   const userDetail = client.db("volunteer").collection("userDetails");
+  const adminCollection = client.db("volunteer").collection("adminPanel");
     
   app.post("/addItem", (req, res) => {
       const item = req.body;
@@ -36,7 +37,8 @@ client.connect(err => {
 
 
   app.get('/allItems',(req, res) => {
-    collection.find({})
+    const search = req.query.search;
+    collection.find({name: {$regex: search}})
     .toArray((err, document) => {
       res.send(document)
     })
@@ -75,6 +77,41 @@ client.connect(err => {
       console.log(result);
     })
   })
+
+
+
+  // admin
+  app.get('/checkAdmin', (req, res) => {
+    const email = req.query.email;
+    adminCollection.find({email: email})
+      .toArray((err, documents) => {
+        if(documents.length === 0){
+          res.send({admin: false})
+        }else{
+          res.send({admin: true})
+        }
+      })
+  })
+
+
+// insert service
+app.post('/addService', (req, res) => {
+  const file = req.files.file;
+  const name = req.body.name;
+  const newImg = file.data;
+  const encImg = newImg.toString('base64');
+
+  var image = {
+    contentType: file.mimetype,
+    size: file.size,
+    img: Buffer.from(encImg, 'base64')
+  };
+
+  collection.insertOne({ name, image })
+    .then(result => {
+      res.send(result.insertedCount > 0)
+    })
+})
 
 });
 
